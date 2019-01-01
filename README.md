@@ -43,14 +43,22 @@ Bzeem was inspired by:
 
 ### Short term & known issues
 
-* need to add a footer to each page
-* looks like swarm stores modification date or something, because writing the same zim again gives different hash - not good.
+* good enough for MVP :)
 
 ### Longer term
 
 * Store raw data and render it on the fly
   * In browsers, it shouldn't be impossible to do this in JavaScript (scripts, anyone?)
   * The full history can be downloaded from the above site - each version could be stored
-  * Since historical versions are immutable, need to find a good diff. git?
+  * How to store versions efficiently? look to git for inspiration?
 * ENS
 * Swarm feeds?
+
+## Support
+
+To see how it goes, I opened ETH addresses for some of these little side
+projects - like this one? Why not send something to:
+
+0x90DD70149566E76DAF9E43893f836343bbCB9232
+
+Any kind of TX welcome :)

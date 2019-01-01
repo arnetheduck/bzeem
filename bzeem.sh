@@ -54,6 +54,8 @@ echo
 
 [ "$CONT" == "y" ] || error "Then don't."
 
+SUM=$(sha256sum "$1" | cut -d ' ' -f1)
+
 # Build extract_zim if needed
 [ -f bin/extract_zim ] || make
 [ -f bin/extract_zim ] || error "Couldn't build extract_zim"
@@ -66,7 +68,6 @@ echo Extracting...
 MAIN=$(bin/extract_zim "$ZIM_FILE" | grep "Main page" | sed -rn 's/Main page is (.*)/\1/p' | xargs)
 
 echo Done, main page: $MAIN
-
 
 # extract_zim will write to `out`
 cd out
@@ -81,6 +82,22 @@ sed -i "s|MAIN_PAGE|$MAIN|g" index.html
 
 # Zim files contain a full-text search that we're not using, wipe it:
 [ -d Z ] && rm -r Z
+
+# Insert an origin declaration - could probably do something nicer in the future...
+echo Adding footer...
+SHORT_ZIM_FILE=$(basename "$ZIM_FILE")
+find -name "*.htm*" -type f -exec sed -i "s|</body>|<p style=\"text-align:center;font-size:10\"><a href=\"https://github.com/arnetheduck/bzeem\">bzeem</a> turned $SHORT_ZIM_FILE (sha256: $SUM) into what you're seeing</p></body>|" {} +
+
+# Now, a bit of a hack - swarm includes date in metadata, but zim does not. Try
+# to fetch it from filename instead:
+DATE=${ZIM_FILE: -11:7}-01
+
+if date -d $DATE > /dev/null; then
+  echo Setting file modification date to: $DATE
+  TZ=UTC find . -type f -exec touch -d "$DATE" {} +
+else
+  echo "Can't parse date from filename: $DATE"
+fi
 
 # The only output the swarm version I'm using gives is the hash that points to
 # the manifest of the uploaded data. Let's print something more handy..
