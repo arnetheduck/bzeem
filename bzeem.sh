@@ -13,6 +13,7 @@ usage() {
   echo "	$0 [-h|--help] [--main=<article>] <zim file>"
   echo ""
   echo "  -h|--help   - displays help"
+  echo "  --date      - date of snapshot (defaults to poor filename parsing)"
   exit 2
 }
 
@@ -20,7 +21,7 @@ if [ "$(getopt --test >/dev/null 2>&1; echo $?)" -ne "4" ]; then
   error "getopt enchanced required, 'getopt --test' should have exit code 4"
 fi
 
-LONG_OPT="help:"
+LONG_OPT="help,date:,yes"
 SHORT_OPT="h"
 PARSED_OPTS=$(getopt -n "$0" -o "$SHORT_OPT" -l "$LONG_OPT" -- "$@") || usage
 
@@ -33,6 +34,12 @@ while true; do
   case "$1" in
     -h|--help)
       usage;;
+    --date)
+      SNAP_DATE="$2"
+      shift 2;;
+    --yes)
+      CONT=y;
+      shift ;;
     --)
       shift;
       break;;
@@ -49,7 +56,7 @@ done
 ZIM_FILE="$(realpath "$1")"
 
 # You never know..
-read -p "About to extract $ZIM_FILE and upload it to swarm, good to go (y/n)? " CONT
+[ "$CONT" == "y" ] || read -p "About to extract $ZIM_FILE and upload it to swarm, good to go (y/n)? " CONT
 echo
 
 [ "$CONT" == "y" ] || error "Then don't."
@@ -90,15 +97,17 @@ find -name "*.htm*" -type f -exec sed -i "s|</body>|<p style=\"text-align:center
 
 # Now, a bit of a hack - swarm includes date in metadata, but zim does not. Try
 # to fetch it from filename instead:
-DATE=${ZIM_FILE: -11:7}-01
+[ "z$SNAP_DATE" == "z" ] && SNAP_DATE=${ZIM_FILE: -11:7}-01
 
-if date -d $DATE > /dev/null; then
-  echo Setting file modification date to: $DATE
-  TZ=UTC find . -type f -exec touch -d "$DATE" {} +
+if date -d $SNAP_DATE > /dev/null; then
+  echo Setting file modification date to: $SNAP_DATE
+  TZ=UTC find . -type f -exec touch -d "$SNAP_DATE" {} +
 else
-  echo "Can't parse date from filename: $DATE"
+  echo "Can't parse date: $SNAP_DATE, using today's date!"
+  TZ=UTC find . -type f -exec touch -d $(date -I) {} +
 fi
 
+echo "Uploading... (might take a while, got $(du -sh . | cut -f1) to do)"
 # The only output the swarm version I'm using gives is the hash that points to
 # the manifest of the uploaded data. Let's print something more handy..
 HASH=$(swarm --recursive --defaultpath "index.html" up .)

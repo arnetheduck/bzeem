@@ -53,12 +53,24 @@ Bzeem was inspired by:
   * How to store versions efficiently? look to git for inspiration?
 * ENS
 * Swarm feeds?
+* Search - potentially, this can be done by building an index that JavaScript in
+  the browser consumes. Cool WASM project.. anyone?
 
-## Support
+## Troubleshooting
 
-To see how it goes, I opened ETH addresses for some of these little side
-projects - like this one? Why not send something to:
+* I upload a zim and the link doesn't work!
+  * It might take a while to sync data between peers in swarm - try again in
+    a bit
+  * Check your connectivity to the swarm network in general
+  * It might be that there is not enough capacity to host your material at the
+    moment - help the network by deploying some (stable) nodes - it's very easy
+  * Swarm itself is under heavy development - head over to their github and fix
+    some bugs :)
 
-0x90DD70149566E76DAF9E43893f836343bbCB9232
+## Funding
+
+Like this project? Send something over to:
+
+ETH: 0x90DD70149566E76DAF9E43893f836343bbCB9232
 
 Any kind of TX welcome :)
